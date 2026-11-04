@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .handwriting {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* 3D Card Scene Setup */
+        .perspective-1000 {
+            perspective: 1200px;
+        }
+
+        .card-container {
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Card Flap 3D Flip */
+        .flap-top {
+            transform-origin: top center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-open .flap-top {
+            transform: rotateX(180deg);
+        }
+
+        .card-inner-letter {
+            transition: transform 0.8s cubic-bezier(0.34, 1.25, 0.64, 1) 0.4s, opacity 0.5s ease 0.4s;
+            transform: translateY(0) scale(0.95);
+        }
+
+        .card-open .card-inner-letter {
+            transform: translateY(-130px) scale(1);
+            z-index: 40;
+        }
+
+        /* Expanded View Mode */
+        .expanded-mode .card-inner-letter {
+            transform: translateY(0) scale(1.05) !important;
+            z-index: 50 !important;
+            position: relative;
+        }
+
+        .expanded-mode .envelope-body {
+            opacity: 0.15;
+            transform: translateY(150px) scale(0.9);
+            pointer-events: none;
+            transition: all 0.8s ease;
+        }
+
+        /* Ambient Glow & Floating Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .glow-effect {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-6 text-slate-100 relative">
+
+    <!-- Ambient Decorative Background Elements -->
+    <div class="fixed top-1/4 left-1/10 w-72 h-72 bg-pink-500/20 rounded-full blur-3xl pointer-events-none glow-effect"></div>
+    <div class="fixed bottom-1/4 right-1/10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none glow-effect" style="animation-delay: 1.5s;"></div>
+
+    <!-- Main Card & Interactive Wrapper -->
+    <div id="mainWrapper" class="w-full max-w-lg flex flex-col items-center justify-center relative z-10 transition-all duration-700">
+
+        <!-- Header Instruction -->
+        <div id="instructionHeader" class="text-center mb-8 transition-opacity duration-500">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-pink-300 text-xs sm:text-sm tracking-widest uppercase font-semibold mb-3 shadow-lg">
+                <i class="fa-solid fa-gift mr-2"></i>A Special Message For You
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300">
+                Tap the card to open
+            </h1>
+        </div>
+
+        <!-- 3D Envelope & Card Container -->
+        <div class="perspective-1000 w-full flex justify-center cursor-pointer" onclick="openCard()">
+            
+            <div id="envelope" class="card-container relative w-80 sm:w-96 h-56 sm:h-64 rounded-2xl shadow-2xl floating">
+                
+                <!-- Back Panel of Envelope -->
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl border border-indigo-500/30 shadow-2xl"></div>
+
+                <!-- LETTER (Inside content, slides out) -->
+                <div id="letter" class="card-inner-letter absolute inset-x-3 top-3 bottom-3 bg-gradient-to-b from-slate-900/95 via-indigo-950/95 to-slate-900/95 rounded-xl border border-pink-500/30 p-6 shadow-2xl flex flex-col justify-between backdrop-blur-xl overflow-hidden">
+                    
+                    <!-- Decorative Corner Accents -->
+                    <div class="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-pink-400/40 rounded-tl-xl pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-pink-400/40 rounded-br-xl pointer-events-none"></div>
+                    
+                    <!-- Letter Header -->
+                    <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-pink-500 inline-block animate-ping"></span>
+                            <span class="text-xs uppercase tracking-wider text-pink-300 font-bold">Level 80 Cleared! 🎉</span>
+                        </div>
+                        <i class="fa-solid fa-cake-candles text-amber-400 text-lg"></i>
+                    </div>
+
+                    <!-- Letter Main Body Message -->
+                    <div class="my-auto py-4 text-center">
+                        <p class="text-slate-200 text-base sm:text-lg leading-relaxed font-medium">
+                            "I know <span class="font-bold text-amber-300 px-1 bg-amber-500/10 rounded border border-amber-500/20">80 levels</span> is not easy, but you endure it, appreciate your patience."
+                        </p>
+                        
+                        <div class="my-3 flex items-center justify-center space-x-2">
+                            <div class="h-px bg-gradient-to-r from-transparent via-pink-500 to-transparent w-24"></div>
+                            <i class="fa-solid fa-heart text-pink-400 text-xs"></i>
+                            <div class="h-px bg-gradient-to-r from-transparent via-pink-500 to-transparent w-24"></div>
+                        </div>
+
+                        <p class="text-pink-200 text-lg sm:text-xl font-semibold handwriting">
+                            Again happy birthday and sorry for any annoyance or frustation created
+                        </p>
+                    </div>
+
+                    <!-- Letter Footer -->
+                    <div class="pt-2 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
+                        <span>Best wishes always</span>
+                        <span class="text-pink-400 font-semibold"><i class="fa-solid fa-sparkles mr-1"></i> Level Up!</span>
+                    </div>
+                </div>
+
+                <!-- Envelope Front Body Pocket (Overlays lower part of envelope) -->
+                <div class="envelope-body absolute inset-0 pointer-events-none z-30 transition-all duration-700">
+                    <!-- Bottom Triangle Cover -->
+                    <div class="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-indigo-950 via-indigo-900 to-indigo-900/40 rounded-b-2xl border-t border-indigo-400/20 backdrop-blur-sm"
+                         style="clip-path: polygon(0 40%, 50% 0, 100% 40%, 100% 100%, 0 100%);"></div>
+                    
+                    <!-- Left Pocket Fold -->
+                    <div class="absolute inset-y-0 left-0 w-44 bg-indigo-950/80 rounded-bl-2xl"
+                         style="clip-path: polygon(0 0, 100% 50%, 0 100%);"></div>
+                    
+                    <!-- Right Pocket Fold -->
+                    <div class="absolute inset-y-0 right-0 w-44 bg-indigo-950/80 rounded-br-2xl"
+                         style="clip-path: polygon(100% 0, 0 50%, 100% 100%);"></div>
+                </div>
+
+                <!-- Envelope Top Flap (Rotates on open) -->
+                <div id="flap" class="flap-top absolute top-0 inset-x-0 h-32 z-20 pointer-events-none">
+                    <!-- Front face of Top Flap -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-indigo-800 to-indigo-900 rounded-t-2xl border-b border-indigo-400/30 shadow-md backface-hidden"
+                         style="clip-path: polygon(0 0, 100% 0, 50% 100%);">
+                        <!-- Seal Button -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center shadow-lg border border-pink-300/40">
+                            <i class="fa-solid fa-gift text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <!-- Inside face of Top Flap (Visible after flip) -->
+                    <div class="absolute inset-0 bg-indigo-950 rounded-t-2xl border-b border-indigo-500/20"
+                         style="clip-path: polygon(0 0, 100% 0, 50% 100%); transform: rotateX(180deg);"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div id="controls" class="mt-12 flex flex-wrap gap-4 justify-center opacity-0 transition-opacity duration-700 pointer-events-none z-50">
+            <button onclick="triggerConfetti()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium text-sm shadow-lg shadow-pink-500/25 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                <i class="fa-solid fa-sparkles mr-2"></i>Celebrate Again!
+            </button>
+            <button onclick="resetCard()" class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 font-medium text-sm backdrop-blur-md transition transform hover:-translate-y-0.5 active:translate-y-0">
+                <i class="fa-solid fa-rotate-left mr-2"></i>Close Card
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let isOpen = false;
+
+        function openCard() {
+            if (isOpen) return;
+            isOpen = true;
+
+            const wrapper = document.getElementById('mainWrapper');
+            const envelope = document.getElementById('envelope');
+            const controls = document.getElementById('controls');
+            const instruction = document.getElementById('instructionHeader');
+
+            // Add open state class
+            envelope.classList.add('card-open');
+            envelope.classList.remove('floating');
+
+            // Trigger confetti blast after flap opens
+            setTimeout(() => {
+                triggerConfetti();
+            }, 400);
+
+            // Expand letter fully for optimal reading after initial extraction animation
+            setTimeout(() => {
+                wrapper.classList.add('expanded-mode');
+                instruction.style.opacity = '0';
+                
+                // Show control buttons
+                controls.classList.remove('opacity-0', 'pointer-events-none');
+            }, 1000);
+        }
+
+        function resetCard() {
+            isOpen = false;
+            const wrapper = document.getElementById('mainWrapper');
+            const envelope = document.getElementById('envelope');
+            const controls = document.getElementById('controls');
+            const instruction = document.getElementById('instructionHeader');
+
+            // Hide controls & restore header
+            controls.classList.add('opacity-0', 'pointer-events-none');
+            wrapper.classList.remove('expanded-mode');
+
+            setTimeout(() => {
+                envelope.classList.remove('card-open');
+                instruction.style.opacity = '1';
+                setTimeout(() => {
+                    envelope.classList.add('floating');
+                }, 800);
+            }, 300);
+        }
+
+        function triggerConfetti() {
+            // Heart & colorful confetti burst
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+                colors: ['#ec4899', '#f59e0b', '#8b5cf6']
+            });
+            fire(0.2, {
+                spread: 60,
+                colors: ['#f472b6', '#38bdf8', '#a78bfa']
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                colors: ['#e11d48', '#fbbf24', '#c084fc']
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 45,
+            });
+        }
+    </script>
+</body>
+</html>
